@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package util_test
 
-import "testing"
+import (
+	"github.com/zlxtqbdgdgd/sailor/util"
+	gc "gopkg.in/check.v1"
+)
 
 const (
 	esRespBody = `{
@@ -65,7 +68,12 @@ const (
 `
 )
 
-func TestGetJsonSegment(t *testing.T) {
+type utilSuite struct {
+}
+
+var _ = gc.Suite(&utilSuite{})
+
+func (*utilSuite) TestGetJsonSegment(c *gc.C) {
 	type Source struct {
 		Label   string `json:"custom_tag"`
 		Word    string `json:"title"`
@@ -81,11 +89,11 @@ func TestGetJsonSegment(t *testing.T) {
 		Sort   []int64 `json:"sort"`
 	}
 	var ss []S
-	err := GetJsonSegment([]byte(esRespBody), &ss, "hits", "hits")
+	err := util.GetJsonSegment([]byte(esRespBody), &ss, "hits", "hits")
 	if err != nil {
-		t.Fatal("error:", err)
+		c.Fatal("error:", err)
 	}
-	t.Logf("%+v", ss)
+	c.Logf("%+v", ss)
 	if len(ss) != 2 ||
 		ss[0].Id != "165a9a0e9f031f86dfe71541375916a8" ||
 		ss[1].Id != "0ca045924e03c50028334c4b185992d2" ||
@@ -93,7 +101,7 @@ func TestGetJsonSegment(t *testing.T) {
 		ss[0].Content != "玫瑰：原产地中国。属蔷薇目，蔷薇科落叶灌木。玫瑰是英国的国花。" ||
 		ss[1].PV != 2145127 || ss[1].Word != "牡丹" || ss[1].Label != "文学作品" ||
 		ss[1].Content != "《牡丹》是唐代女诗人薛涛创作的一首七言律诗。" {
-		t.Fatal("Pickup Result error, got: ", ss, "\n====want: 玫瑰,4024101,default,"+
+		c.Fatal("Pickup Result error, got: ", ss, "\n====want: 玫瑰,4024101,default,"+
 			"牡丹,2145127,文学作品")
 	}
 }

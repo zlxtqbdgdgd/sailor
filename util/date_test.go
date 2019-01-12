@@ -12,64 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package util_test
 
 import (
-	"testing"
 	"time"
+
+	"github.com/zlxtqbdgdgd/sailor/util"
+	gc "gopkg.in/check.v1"
 )
 
-func runSqueezeDays(t *testing.T, layout string, days, comp []string) {
-	out, err := SqueezeDaysText(layout, days)
+type dateSuite struct {
+}
+
+var _ = gc.Suite(&dateSuite{})
+
+func runSqueezeDays(c *gc.C, layout string, days, comp []string) {
+	out, err := util.SqueezeDaysText(layout, days)
 	if err != nil {
-		t.Fatal(err)
+		c.Fatal(err)
 	}
 	for i, _ := range out {
 		if out[i] != comp[i] {
-			t.Fatalf("got: %v, want: %v", out, comp)
+			c.Fatalf("got: %v, want: %v", out, comp)
 		}
 	}
 }
 
-func TestSqueezeDays(t *testing.T) {
+func (*dateSuite) TestSqueezeDays(c *gc.C) {
 	//
 	days := []string{"5月13日", "5月14日", "5月15日", "5月18日"}
 	comp := []string{"5月13日至5月15日", "5月18日"}
-	runSqueezeDays(t, "1月2日", days, comp)
+	runSqueezeDays(c, "1月2日", days, comp)
 	//
 	days = []string{"2018-5-13", "2018-5-14", "2018-5-15", "2018-5-18"}
 	comp = []string{"2018-5-13至2018-5-15", "2018-5-18"}
-	runSqueezeDays(t, "2006-1-2", days, comp)
+	runSqueezeDays(c, "2006-1-2", days, comp)
 	//
 	days = []string{"5月13日", "5月15日", "5月16日", "5月17日"}
 	comp = []string{"5月13日", "5月15日至5月17日"}
-	runSqueezeDays(t, "1月2日", days, comp)
+	runSqueezeDays(c, "1月2日", days, comp)
 	//
 	days = []string{"5月13日", "5月15日", "5月16日", "5月18日", "5月19日"}
 	comp = []string{"5月13日", "5月15日至5月16日", "5月18日至5月19日"}
-	runSqueezeDays(t, "1月2日", days, comp)
+	runSqueezeDays(c, "1月2日", days, comp)
 }
 
-func runDaysBetweenTest(t *testing.T, want int, start, end time.Time) {
+func runDaysBetweenTest(c *gc.C, want int, start, end time.Time) {
 	//t.Logf("test -- start: %v, end: %v", start, end)
-	days := DaysBetween(start, end)
+	days := util.DaysBetween(start, end)
 	if days != want {
-		t.Fatalf("want: %d, got: %d", want, days)
+		c.Fatalf("want: %d, got: %d", want, days)
 	}
 }
 
-func TestDaysBetween(t *testing.T) {
+func (*dateSuite) TestDaysBetween(c *gc.C) {
 	start, _ := time.Parse("2006-01-02", "2018-05-10")
-	runDaysBetweenTest(t, 0, start, start.Add(time.Minute))
-	runDaysBetweenTest(t, 1, start, start.Add(24*time.Hour))
-	runDaysBetweenTest(t, 2, start, start.Add(49*time.Hour))
-	runDaysBetweenTest(t, -1, start, start.Add(-1*time.Minute))
-	runDaysBetweenTest(t, -2, start, start.Add(-25*time.Hour))
+	runDaysBetweenTest(c, 0, start, start.Add(time.Minute))
+	runDaysBetweenTest(c, 1, start, start.Add(24*time.Hour))
+	runDaysBetweenTest(c, 2, start, start.Add(49*time.Hour))
+	runDaysBetweenTest(c, -1, start, start.Add(-1*time.Minute))
+	runDaysBetweenTest(c, -2, start, start.Add(-25*time.Hour))
 
 	start, _ = time.Parse("2006-01-02 15:04", "2018-05-10 10:00")
-	runDaysBetweenTest(t, 0, start, start.Add(13*time.Hour))
-	runDaysBetweenTest(t, 1, start, start.Add(14*time.Hour))
-	runDaysBetweenTest(t, 2, start, start.Add(49*time.Hour))
-	runDaysBetweenTest(t, -0, start, start.Add(-10*time.Hour))
-	runDaysBetweenTest(t, -1, start, start.Add(-25*time.Hour))
+	runDaysBetweenTest(c, 0, start, start.Add(13*time.Hour))
+	runDaysBetweenTest(c, 1, start, start.Add(14*time.Hour))
+	runDaysBetweenTest(c, 2, start, start.Add(49*time.Hour))
+	runDaysBetweenTest(c, -0, start, start.Add(-10*time.Hour))
+	runDaysBetweenTest(c, -1, start, start.Add(-25*time.Hour))
 }

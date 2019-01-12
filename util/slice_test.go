@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package util_test
 
 import (
-	"testing"
+	gc "gopkg.in/check.v1"
+	"github.com/zlxtqbdgdgd/sailor/util"
 )
 
-func TestInSlice(t *testing.T) {
+type sliceSuite struct {
+}
+
+var _ = gc.Suite(&sliceSuite{})
+
+func (*sliceSuite) TestInSlice(c *gc.C) {
 	sl := []string{"A", "b"}
-	if !InSlice("A", sl) {
-		t.Error("should be true")
+	if !util.InSlice("A", sl) {
+		c.Error("should be true")
 	}
-	if InSlice("B", sl) {
-		t.Error("should be false")
+	if util.InSlice("B", sl) {
+		c.Error("should be false")
 	}
 }

@@ -1,3 +1,12 @@
 [submodule "vendor/github.com/redigo"]
 	path = vendor/github.com/redigo
 	url = https://github.com/garyburd/redigo.git
+[submodule "vendor/gopkg.in/check.v1"]
+	path = vendor/gopkg.in/check.v1
+	url = https://gopkg.in/check.v1
+[submodule "vendor/github.com/kr/pretty"]
+	path = vendor/github.com/kr/pretty
+	url = https://github.com/kr/pretty.git
+[submodule "vendor/github.com/kr/text"]
+	path = vendor/github.com/kr/text
+	url = https://github.com/kr/text.git

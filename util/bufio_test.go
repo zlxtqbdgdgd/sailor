@@ -12,51 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package util_test
 
 import (
 	"bufio"
 	"io"
 	"strings"
-	"testing"
+
+	"github.com/zlxtqbdgdgd/sailor/util"
+	gc "gopkg.in/check.v1"
 )
 
-func TestReadlnTrimmed(t *testing.T) {
+type bufioSuite struct {
+}
+
+var _ = gc.Suite(&bufioSuite{})
+
+func (*bufioSuite) TestReadlnTrimmed(c *gc.C) {
 	data := "hello world\nlet's start test TestReadlnTrimmed\ncome on!"
 	b := bufio.NewReader(strings.NewReader(data))
 	results := ""
-	if result, err := ReadlnTrimmed(b, 100); err == nil {
+	if result, err := util.ReadlnTrimmed(b, 100); err == nil {
 		results += result + "\n"
 	}
-	if result, err := ReadlnTrimmed(b, 100); err == nil {
+	if result, err := util.ReadlnTrimmed(b, 100); err == nil {
 		results += result + "\n"
 	}
-	if result, err := ReadlnTrimmed(b, 100); err == nil {
+	if result, err := util.ReadlnTrimmed(b, 100); err == nil {
 		results += result
 	}
 	if results != data {
-		t.Fatal("ReadlnTrimmed test failed, want:", data, "\ngot:", results)
+		c.Fatal("ReadlnTrimmed test failed, want:", data, "\ngot:", results)
 	}
 	// test trim
 	data = "ABCDEFGHIJKLMN\n1234567890123"
 	b = bufio.NewReader(strings.NewReader(data))
-	result, err := ReadlnTrimmed(b, 10)
+	result, err := util.ReadlnTrimmed(b, 10)
 	if err != nil {
-		t.Fatal("ReadlnTrimmed test failed, err:", err)
+		c.Fatal("ReadlnTrimmed test failed, err:", err)
 	}
 	if result != "ABCDEFGHIJ" {
-		t.Fatal("ReadlnTrimmed test failed, want: ABCDEFGHIJ", "\ngot:", result)
+		c.Fatal("ReadlnTrimmed test failed, want: ABCDEFGHIJ", "\ngot:", result)
 	}
-	result, err = ReadlnTrimmed(b, 10)
+	result, err = util.ReadlnTrimmed(b, 10)
 	if err != nil {
-		t.Fatal("ReadlnTrimmed test failed, err:", err)
+		c.Fatal("ReadlnTrimmed test failed, err:", err)
 	}
 	if result != "1234567890" {
-		t.Fatal("ReadlnTrimmed test failed, want: 1234567890", "\ngot:", result)
+		c.Fatal("ReadlnTrimmed test failed, want: 1234567890", "\ngot:", result)
 	}
-	result, err = ReadlnTrimmed(b, 10)
+	result, err = util.ReadlnTrimmed(b, 10)
 	if err != io.EOF {
-		t.Fatal("ReadlnTrimmed test failed, err:", err)
+		c.Fatal("ReadlnTrimmed test failed, err:", err)
 	}
 	// test buffer more than 64kb(bufio.MaxScanTokenSize)
 	data = ""
@@ -64,11 +71,11 @@ func TestReadlnTrimmed(t *testing.T) {
 		data += "A"
 	}
 	b = bufio.NewReader(strings.NewReader(data))
-	result, err = ReadlnTrimmed(b, 65*1024)
+	result, err = util.ReadlnTrimmed(b, 65*1024)
 	if err != nil {
-		t.Fatal("ReadlnTrimmed test failed, err:", err)
+		c.Fatal("ReadlnTrimmed test failed, err:", err)
 	}
 	if len(result) != 65*1024 {
-		t.Fatal("ReadlnTrimmed test failed, exceed max buf size!")
+		c.Fatal("ReadlnTrimmed test failed, exceed max buf size!")
 	}
 }

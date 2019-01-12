@@ -12,127 +12,180 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package util_test
 
 import (
-	"testing"
+	gc "gopkg.in/check.v1"
+
+	"io/ioutil"
+
+	"github.com/zlxtqbdgdgd/sailor/util"
 )
 
-func TestGetCfgVal(t *testing.T) {
-	if err := InitConf("../testdata/app.json"); err != nil {
-		t.Fatal("init config file error")
+const json = `{
+  "test": {
+    "triple_data":"/roobo/data/pzg/singer.raw",
+    "test1":1234,
+    "test2": {
+      "test21":"test",
+      "test22":2.2
+    },
+    "test3":"abc",
+    "test4": [
+      "abc",
+      "abd",
+      "hij"
+    ],
+    "test5": true,
+    "test6": [1, 3, 5],
+    "test7": [1.1, 3.3, 5.5]
+  }
+}`
+
+type configSuite struct {
+	filepath string
+}
+
+var _ = gc.Suite(&configSuite{})
+
+// Setupsuite 准备测试用的临时文件
+func (s *configSuite) SetUpSuite(c *gc.C) {
+	dir := c.MkDir() // Suite结束后会自动销毁c.MkDir()创建的目录
+
+	tmpfile, err := ioutil.TempFile(dir, "")
+	if err != nil {
+		c.Errorf("Fail to create test file: %v\n", tmpfile.Name(), err)
+	}
+
+	_, err = tmpfile.Write([]byte(json))
+	if err != nil {
+		c.Errorf("Fail to prepare test file.%v\n", tmpfile.Name(), err)
+	}
+	if err := tmpfile.Sync(); err != nil {
+		c.Errorf("Fail to prepare test file.%v\n", tmpfile.Name(), err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		c.Errorf("Fail to prepare test file.%v\n", tmpfile.Name(), err)
+	}
+
+	s.filepath = tmpfile.Name()
+}
+
+func (s *configSuite) TestGetCfgVal(c *gc.C) {
+	if err := util.InitConf(s.filepath); err != nil {
+		c.Fatal("init config file error")
 	}
 	// test int
-	testInt, err := GetCfgVal(1000, "test", "test1")
+	testInt, err := util.GetCfgVal(1000, "test", "test1")
 	if err != nil {
-		t.Fatalf("test test1 failed, error: %s", err.Error())
+		c.Fatalf("test test1 failed, error: %s", err.Error())
 	}
 	if testInt != 1234 {
-		t.Fatalf("want: 1234, got: %d", testInt)
+		c.Fatalf("want: 1234, got: %d", testInt)
 	}
-	if Int, _ := GetIntCfgVal(1000, "test", "test1"); Int != 1234 {
-		t.Fatalf("want: 1234, got: %d", Int)
+	if Int, _ := util.GetIntCfgVal(1000, "test", "test1"); Int != 1234 {
+		c.Fatalf("want: 1234, got: %d", Int)
 	}
 	// test string
-	testStr, err := GetCfgVal("", "test", "test2", "test21")
+	testStr, err := util.GetCfgVal("", "test", "test2", "test21")
 	if err != nil || testStr != "test" {
-		t.Fatalf("want: test, got: %s, error: %s", testStr, err.Error())
+		c.Fatalf("want: test, got: %s, error: %s", testStr, err.Error())
 	}
-	if Str, _ := GetStringCfgVal("", "test", "test2", "test21"); Str != "test" {
-		t.Fatalf("want: test, got: %s", Str)
+	if Str, _ := util.GetStringCfgVal("", "test", "test2", "test21"); Str != "test" {
+		c.Fatalf("want: test, got: %s", Str)
 	}
 	// test bool
-	testbool, err := GetCfgVal(false, "test", "test5")
+	testbool, err := util.GetCfgVal(false, "test", "test5")
 	if err != nil {
-		t.Fatalf("test test1 failed, error: %s", err.Error())
+		c.Fatalf("test test1 failed, error: %s", err.Error())
 	}
 	if testbool.(bool) != true {
-		t.Fatalf("want: true, got: %v", testbool)
+		c.Fatalf("want: true, got: %v", testbool)
 	}
-	if Bool, _ := GetBoolCfgVal(false, "test", "test5"); !Bool {
-		t.Fatalf("want: true, got: %t", Bool)
+	if Bool, _ := util.GetBoolCfgVal(false, "test", "test5"); !Bool {
+		c.Fatalf("want: true, got: %t", Bool)
 	}
 	// test float
-	testfloat, err := GetCfgVal(0.0, "test", "test2", "test22")
+	testfloat, err := util.GetCfgVal(0.0, "test", "test2", "test22")
 	if err != nil || testfloat != 2.2 {
-		t.Fatalf("want: abc, got: %f, error: %s", testStr, err.Error())
+		c.Fatalf("want: abc, got: %f, error: %s", testStr, err.Error())
 	}
-	if Float, _ := GetFloatCfgVal("", "test", "test2", "test22"); Float != 2.2 {
-		t.Fatalf("want: 2.2, got: %f", Float)
+	if Float, _ := util.GetFloatCfgVal("", "test", "test2", "test22"); Float != 2.2 {
+		c.Fatalf("want: 2.2, got: %f", Float)
 	}
 	// test string
-	testStr, err = GetCfgVal("", "test", "test3")
+	testStr, err = util.GetCfgVal("", "test", "test3")
 	if err != nil || testStr != "abc" {
-		t.Fatalf("want: abc, got: %s, error: %s", testStr, err.Error())
+		c.Fatalf("want: abc, got: %s, error: %s", testStr, err.Error())
 	}
 	// test array
-	array, err := GetCfgVal([]string{}, "test", "test4")
+	array, err := util.GetCfgVal([]string{}, "test", "test4")
 	if err != nil {
-		t.Fatal(err)
+		c.Fatal(err)
 	}
-	ss := Conv2StrSlice(array.([]interface{}))
+	ss := util.Conv2StrSlice(array.([]interface{}))
 	if ss[0] != "abc" || ss[1] != "abd" || ss[2] != "hij" {
-		t.Fatal("want: [abc abd hij], got: %v", ss)
+		c.Fatal("want: [abc abd hij], got: %v", ss)
 	}
 	// test wrong config
-	testStr, err = GetCfgVal("", "test", "test100")
+	testStr, err = util.GetCfgVal("", "test", "test100")
 	if err == nil {
-		t.Fatalf("test|test4 test wrong")
+		c.Fatalf("test|test4 test wrong")
 	}
-	testStr, err = GetCfgVal("", "test", "test2", "test5")
+	testStr, err = util.GetCfgVal("", "test", "test2", "test5")
 	if err == nil {
-		t.Fatalf("test|test2|test5 test wrong, got testStr: %v", testStr)
+		c.Fatalf("test|test2|test5 test wrong, got testStr: %v", testStr)
 	}
 }
 
-func TestGetSpecCfgVal(t *testing.T) {
-	var cfgData CfgData
-	cfgData, err := InitSpecConf("../testdata/app.json")
+func (s *configSuite) TestGetSpecCfgVal(c *gc.C) {
+	var cfgData util.CfgData
+	cfgData, err := util.InitSpecConf(s.filepath)
 	if err != nil {
-		t.Fatal("init config file error")
+		c.Fatal("init config file error")
 	}
-	testInt, err := GetSpecCfgVal(cfgData, 1000, "test", "test1")
+	testInt, err := util.GetSpecCfgVal(cfgData, 1000, "test", "test1")
 	if err != nil {
-		t.Fatalf("test test1 failed, error: %s", err.Error())
+		c.Fatalf("test test1 failed, error: %s", err.Error())
 	}
 	if testInt != 1234 {
-		t.Fatalf("want: 1234, got: %d", testInt)
+		c.Fatalf("want: 1234, got: %d", testInt)
 	}
-	testStr, err := GetSpecCfgVal(cfgData, "", "test", "test2", "test21")
+	testStr, err := util.GetSpecCfgVal(cfgData, "", "test", "test2", "test21")
 	if err != nil || testStr != "test" {
-		t.Fatalf("want: test, got: %s, error: %s", testStr, err.Error())
+		c.Fatalf("want: test, got: %s, error: %s", testStr, err.Error())
 	}
-	testfloat, err := GetSpecCfgVal(cfgData, 0.0, "test", "test2", "test22")
+	testfloat, err := util.GetSpecCfgVal(cfgData, 0.0, "test", "test2", "test22")
 	if err != nil || testfloat != 2.2 {
-		t.Fatalf("want: abc, got: %f, error: %s", testStr, err.Error())
+		c.Fatalf("want: abc, got: %f, error: %s", testStr, err.Error())
 	}
-	testStr, err = GetSpecCfgVal(cfgData, "", "test", "test3")
+	testStr, err = util.GetSpecCfgVal(cfgData, "", "test", "test3")
 	if err != nil || testStr != "abc" {
-		t.Fatalf("want: abc, got: %s, error: %s", testStr, err.Error())
+		c.Fatalf("want: abc, got: %s, error: %s", testStr, err.Error())
 	}
 	// test wrong config
-	testStr, err = GetSpecCfgVal(cfgData, "", "test", "test100")
+	testStr, err = util.GetSpecCfgVal(cfgData, "", "test", "test100")
 	if err == nil {
-		t.Fatalf("test|test4 test wrong")
+		c.Fatalf("test|test4 test wrong")
 	}
-	testStr, err = GetSpecCfgVal(cfgData, "", "test", "test2", "test5")
+	testStr, err = util.GetSpecCfgVal(cfgData, "", "test", "test2", "test5")
 	if err == nil {
-		t.Fatalf("test|test2|test5 test wrong")
+		c.Fatalf("test|test2|test5 test wrong")
 	}
 	// test int array
-	ints, err := GetIntArraySpecCfgVal(cfgData, nil, "test", "test6")
+	ints, err := util.GetIntArraySpecCfgVal(cfgData, nil, "test", "test6")
 	if err != nil {
-		t.Fatal(err)
+		c.Fatal(err)
 	}
 	if ints[0] != 1 || ints[1] != 3 || ints[2] != 5 {
-		t.Fatalf("got: %+v, want: [1, 3, 5]", ints)
+		c.Fatalf("got: %+v, want: [1, 3, 5]", ints)
 	}
 	// test float array
-	ff, err := GetFloatArraySpecCfgVal(cfgData, nil, "test", "test7")
+	ff, err := util.GetFloatArraySpecCfgVal(cfgData, nil, "test", "test7")
 	if err != nil {
-		t.Fatal(err)
+		c.Fatal(err)
 	}
 	if ff[0] != 1.1 || ff[1] != 3.3 || ff[2] != 5.5 {
-		t.Fatalf("got: %+v, want: [1.1, 3.3, 5.5]", ff)
+		c.Fatalf("got: %+v, want: [1.1, 3.3, 5.5]", ff)
 	}
 }
