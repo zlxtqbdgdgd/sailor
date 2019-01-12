@@ -1,0 +1,3 @@
+[submodule "vendor/github.com/redigo"]
+	path = vendor/github.com/redigo
+	url = https://github.com/garyburd/redigo.git

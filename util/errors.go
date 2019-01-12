@@ -1,8 +1,3 @@
-# sailor
-
-
-
-```
 // Copyright 2018 ROOBO. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,4 +11,28 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-```
+
+package util
+
+import "fmt"
+
+var (
+	ErrNoResult = NewErr("No Result")
+)
+
+type errorString struct {
+	s string
+}
+
+func NewErr(text ...interface{}) error {
+	return &errorString{fmt.Sprint(text...)}
+}
+
+func NewErrf(format string, a ...interface{}) error {
+	text := fmt.Sprintf(format, a...)
+	return &errorString{text}
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}

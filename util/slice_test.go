@@ -1,8 +1,3 @@
-# sailor
-
-
-
-```
 // Copyright 2018 ROOBO. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,4 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-```
+
+package util
+
+import (
+	"testing"
+)
+
+func TestInSlice(t *testing.T) {
+	sl := []string{"A", "b"}
+	if !InSlice("A", sl) {
+		t.Error("should be true")
+	}
+	if InSlice("B", sl) {
+		t.Error("should be false")
+	}
+}
