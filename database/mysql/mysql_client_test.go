@@ -5,13 +5,21 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	gc "gopkg.in/check.v1"
 )
 
-func TestFloat64(t *testing.T) {
+func Test(t *testing.T) { gc.TestingT(t) }
+
+type mysqlSuite struct {
+}
+
+var _ = gc.Suite(&mysqlSuite{})
+
+func (*mysqlSuite) TestFloat64(c *gc.C) {
 	dsn := "root:@tcp(192.168.1.31:3306)/%s?timeout=1s&charset=utf8"
 	dbt, err := GetClient(dsn, "gotest")
 	if err != nil {
-		t.Fatal(err)
+		c.Fatal(err)
 	}
 	dbt.Exec("DROP TABLE IF EXISTS test")
 
@@ -26,10 +34,10 @@ func TestFloat64(t *testing.T) {
 		if rows.Next() {
 			rows.Scan(&out)
 			if expected != out {
-				t.Fatalf("%s: %g != %g", v, expected, out)
+				c.Fatalf("%s: %g != %g", v, expected, out)
 			}
 		} else {
-			t.Fatalf("%s: no data", v)
+			c.Fatalf("%s: no data", v)
 		}
 		dbt.Exec("DROP TABLE IF EXISTS test")
 	}
