@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"log"
+
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -42,6 +44,23 @@ func GetValue(key string) (interface{}, error) {
 	redis_cli := pool.Get()
 	defer redis_cli.Close()
 	return redis_cli.Do("GET", key)
+}
+
+func GetStringValue(key string) (string, error) {
+	redis_cli := pool.Get()
+	defer redis_cli.Close()
+	reply, err := redis_cli.Do("GET", key)
+	if err != nil {
+		log.Printf("failed to get value of key:", key, "error:", err.Error())
+		return "", err
+	}
+	v, err := redis.String(reply, err)
+	if err != nil {
+		log.Printf("failed to convert value of key:", key, ", error:", err.Error())
+		return "", err
+	}
+
+	return v, nil
 }
 
 func SetValue(key string, value interface{}) error {
