@@ -1,4 +1,4 @@
-// Copyright 2018 ROOBO. All Rights Reserved.
+// Copyright 2018 JXB. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 
 const json = `{
   "test": {
-    "triple_data":"/roobo/data/pzg/singer.raw",
+    "triple_data":"/JXB/data/pzg/singer.raw",
     "test1":1234,
     "test2": {
       "test21":"test",
