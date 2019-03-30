@@ -15,11 +15,13 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // CopyFile writes the contents of the given source file to dest.
@@ -110,4 +112,39 @@ func AtomicWriteFile(filename string, contents []byte, perms os.FileMode) (err e
 		}
 		return nil
 	})
+}
+
+func CheckFileIsExist(filename string) bool {
+	var exist = true
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		exist = false
+	}
+	return exist
+}
+
+func LoadFileToList(fileName string) ([]string, error) {
+	var lines []string
+	if !CheckFileIsExist(fileName) {
+		return lines, NewErrf("do not find file %s", fileName)
+	}
+
+	fHandler, err := os.Open(fileName)
+	if err != nil {
+		return lines, err
+	}
+
+	rd := bufio.NewReader(fHandler)
+
+	for {
+		line, err := rd.ReadString('\n')
+		if err != nil || io.EOF == err {
+			break
+		}
+		if line == "\n" {
+			continue
+		}
+		lines = append(lines, strings.TrimSpace(line))
+	}
+
+	return lines, nil
 }

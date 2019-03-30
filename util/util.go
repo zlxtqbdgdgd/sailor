@@ -19,10 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"bufio"
-	"io"
-	"strings"
 )
 
 func LoadJson(fileName string, result interface{}) error {
@@ -63,39 +59,4 @@ func GetJsonSegment(raw []byte, v interface{}, keys ...string) error {
 		}
 	}
 	return errors.New(fmt.Sprintf("invalid Key: %v", keys))
-}
-
-func CheckFileIsExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false
-	}
-	return exist
-}
-
-func LoadFileToList(fileName string) ([]string, error) {
-	var lines []string
-	if !CheckFileIsExist(fileName) {
-		return lines, errors.New(fmt.Sprintf("Do not find file %s", fileName))
-	}
-
-	fHandler, err := os.Open(fileName)
-	if err != nil {
-		return lines, err
-	}
-
-	rd := bufio.NewReader(fHandler)
-
-	for {
-		line, err := rd.ReadString('\n')
-		if err != nil || io.EOF == err {
-			break
-		}
-		if line == "\n" {
-			continue
-		}
-		lines = append(lines, strings.TrimSpace(line))
-	}
-
-	return lines, nil
 }
